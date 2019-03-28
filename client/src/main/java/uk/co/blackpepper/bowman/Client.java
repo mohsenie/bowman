@@ -42,7 +42,7 @@ import static uk.co.blackpepper.bowman.ReflectionSupport.setId;
  * @author Ryan Pickett
  * 
  */
-public class Client<T> {
+public class Client<T>{
 
 	private final Class<T> entityType;
 
@@ -57,7 +57,7 @@ public class Client<T> {
 		this.entityType = entityType;
 		this.baseUri = getEntityBaseUri(entityType, configuration);
 		this.proxyFactory = proxyFactory;
-		this.restOperations = restOperations;
+		this.restOperations = restOperations;		
 	}
 	
 	/**
@@ -110,7 +110,7 @@ public class Client<T> {
 		for (Resource<T> resource : resources) {
 			result.add(proxyFactory.create(resource, restOperations));
 		}
-
+		
 		return result;
 	}
 	
@@ -169,7 +169,6 @@ public class Client<T> {
 	
 	private static URI getEntityBaseUri(Class<?> entityType, Configuration configuration) {
 		String path = entityType.getAnnotation(RemoteResource.class).value();
-		
 		return UriComponentsBuilder.fromUri(configuration.getBaseUri()).path(path).build().toUri();
-	}
+	}	
 }

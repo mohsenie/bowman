@@ -23,7 +23,7 @@ package uk.co.blackpepper.bowman;
  * @author Ryan Pickett
  * 
  */
-public class ClientFactory {
+public class ClientFactory{
 	
 	private final Configuration configuration;
 	
@@ -49,7 +49,8 @@ public class ClientFactory {
 	 * @param entityType the entity type of the required client
 	 * @return the created client
 	 */
-	public <T> Client<T> create(Class<T> entityType) {
+	public <T> Client<T> create(Class<T> entityType, ClientFactoryCallBackInterface callbackInterface) {
+		this.restOperations.setCallbackInterface(callbackInterface);
 		return new Client<>(entityType, configuration, restOperations, proxyFactory);
 	}
 }

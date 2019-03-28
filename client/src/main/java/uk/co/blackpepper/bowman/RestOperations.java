@@ -17,6 +17,7 @@ package uk.co.blackpepper.bowman;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
@@ -25,6 +26,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -33,17 +35,22 @@ class RestOperations {
 	private final RestTemplate restTemplate;
 	
 	private final ObjectMapper objectMapper;
+	private ClientFactoryCallBackInterface callbackInterface;
 	
 	RestOperations(RestTemplate restTemplate, ObjectMapper objectMapper) {
 		this.restTemplate = restTemplate;
-		this.objectMapper = objectMapper;
+		this.objectMapper = objectMapper;		
+	}
+	
+	public void setCallbackInterface(ClientFactoryCallBackInterface callbackInterface) {
+		this.callbackInterface = callbackInterface;
 	}
 	
 	public <T> Resource<T> getResource(URI uri, Class<T> entityType) {
 		ObjectNode node;
 		
 		try {
-			node = restTemplate.getForObject(uri, ObjectNode.class);
+			node = restTemplate.getForObject(uri, ObjectNode.class);			
 		}
 		catch (HttpClientErrorException exception) {
 			if (exception.getStatusCode() == HttpStatus.NOT_FOUND) {
@@ -63,6 +70,23 @@ class RestOperations {
 		
 		try {
 			node = restTemplate.getForObject(uri, ObjectNode.class);
+			JsonNode pageNode = node.get("page");			
+			JsonNode linksNode = node.get("_links");			
+			
+			Pagination pagination = Optional.ofNullable(pageNode).isPresent() ? objectMapper.convertValue(pageNode, Pagination.class) : null;
+			
+			if(Optional.ofNullable(pagination).isPresent()) {
+				JsonNode firstNode = Optional.ofNullable(linksNode).isPresent() ? linksNode.get("first") : null;
+				JsonNode nextNode = Optional.ofNullable(linksNode).isPresent() ? linksNode.get("next") : null;
+				JsonNode lastNode = Optional.ofNullable(linksNode).isPresent() ? linksNode.get("last") : null;
+				
+				pagination.setFirstPage(Optional.ofNullable(firstNode).isPresent() ? firstNode.get("href").asText() : null);
+				pagination.setNextPage(Optional.ofNullable(nextNode).isPresent() ? nextNode.get("href").asText() : null);
+				pagination.setLastPage(Optional.ofNullable(lastNode).isPresent() ? lastNode.get("href").asText() : null);
+			}			
+			if (callbackInterface != null && pagination != null) {				
+				callbackInterface.setPagination(pagination);
+			}
 		}
 		catch (HttpClientErrorException exception) {
 			if (exception.getStatusCode() == HttpStatus.NOT_FOUND) {
