@@ -12,29 +12,25 @@ import org.springframework.beans.BeanUtils;
 
 class DefaultPropertyValueFactory implements PropertyValueFactory {
 
-	@Override
-	public <T extends Collection<?>> T createCollection(Class<?> collectionType) {
-		Object collection = null;
-		
-		if (Collection.class.isAssignableFrom(collectionType) && !collectionType.isInterface()) {
-			collection = BeanUtils.instantiateClass(collectionType);
-		}
-		else if (SortedSet.class.equals(collectionType)) {
-			collection = new TreeSet<>();
-		}
-		else if (Set.class.equals(collectionType)) {
-			collection = new LinkedHashSet<>();
-		}
-		else if (List.class.equals(collectionType) || Collection.class.equals(collectionType)) {
-			collection = new ArrayList<>();
-		}
-		else {
-			throw new ClientProxyException(String.format("Unsupported Collection type: %s", collectionType.getName()));
-		}
-		
-		@SuppressWarnings("unchecked")
-		T result = (T) collection;
-		
-		return result;
-	}
+    @Override
+    public <T extends Collection<?>> T createCollection(Class<?> collectionType) {
+        Object collection = null;
+
+        if (Collection.class.isAssignableFrom(collectionType) && !collectionType.isInterface()) {
+            collection = BeanUtils.instantiateClass(collectionType);
+        } else if (SortedSet.class.equals(collectionType)) {
+            collection = new TreeSet<>();
+        } else if (Set.class.equals(collectionType)) {
+            collection = new LinkedHashSet<>();
+        } else if (List.class.equals(collectionType) || Collection.class.equals(collectionType)) {
+            collection = new ArrayList<>();
+        } else {
+            throw new ClientProxyException(String.format("Unsupported Collection type: %s", collectionType.getName()));
+        }
+
+        @SuppressWarnings("unchecked")
+        T result = (T) collection;
+
+        return result;
+    }
 }

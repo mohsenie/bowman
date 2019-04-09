@@ -20,16 +20,15 @@ import org.springframework.web.client.RestTemplate;
 /**
  * Interface supporting the configuration of the Spring {@link org.springframework.web.client.RestTemplate}
  * used internally by the {@link Client}.
- * 
- * @author Ryan Pickett
  *
+ * @author Ryan Pickett
  */
 public interface RestTemplateConfigurer {
 
-	/**
-	 * Apply some further configuration to the <code>RestTemplate</code> following its initialisation.
-	 * 
-	 * @param restTemplate the <code>RestTemplate</code> to configure
-	 */
-	void configure(RestTemplate restTemplate);
+    /**
+     * Apply some further configuration to the <code>RestTemplate</code> following its initialisation.
+     *
+     * @param restTemplate the <code>RestTemplate</code> to configure
+     */
+    void configure(RestTemplate restTemplate);
 }

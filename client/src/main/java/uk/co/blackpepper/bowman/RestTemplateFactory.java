@@ -22,5 +22,5 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 interface RestTemplateFactory {
 
-	RestTemplate create(ClientHttpRequestFactory clientHttpRequestFactory, ObjectMapper objectMapper);
+    RestTemplate create(ClientHttpRequestFactory clientHttpRequestFactory, ObjectMapper objectMapper);
 }

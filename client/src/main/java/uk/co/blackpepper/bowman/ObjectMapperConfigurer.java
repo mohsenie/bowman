@@ -9,6 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Karl Spies
  */
 public interface ObjectMapperConfigurer {
-	
-	void configure(ObjectMapper objectMapper);
+
+    void configure(ObjectMapper objectMapper);
 }

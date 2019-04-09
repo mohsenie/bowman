@@ -23,13 +23,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 class DefaultRestTemplateFactory implements RestTemplateFactory {
 
-	@Override
-	public RestTemplate create(ClientHttpRequestFactory clientHttpRequestFactory, ObjectMapper objectMapper) {
-		RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
-		
-		restTemplate.getMessageConverters().add(0, new MappingJackson2HttpMessageConverter(objectMapper));
-		restTemplate.getInterceptors().add(new JsonClientHttpRequestInterceptor());
-		
-		return restTemplate;
-	}
+    @Override
+    public RestTemplate create(ClientHttpRequestFactory clientHttpRequestFactory, ObjectMapper objectMapper) {
+        RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
+
+        restTemplate.getMessageConverters().add(0, new MappingJackson2HttpMessageConverter(objectMapper));
+        restTemplate.getInterceptors().add(new JsonClientHttpRequestInterceptor());
+
+        return restTemplate;
+    }
 }

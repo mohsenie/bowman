@@ -28,12 +28,12 @@ import static java.util.Arrays.asList;
 
 class JsonClientHttpRequestInterceptor implements ClientHttpRequestInterceptor {
 
-	@Override
-	public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
-			throws IOException {
-		HttpRequestWrapper wrapped = new HttpRequestWrapper(request);
-		wrapped.getHeaders().put("Content-Type", asList(MediaTypes.HAL_JSON_VALUE));
-		wrapped.getHeaders().put("Accept", asList(MediaTypes.HAL_JSON_VALUE));
-		return execution.execute(wrapped, body);
-	}
+    @Override
+    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+            throws IOException {
+        HttpRequestWrapper wrapped = new HttpRequestWrapper(request);
+        wrapped.getHeaders().put("Content-Type", asList(MediaTypes.HAL_JSON_VALUE));
+        wrapped.getHeaders().put("Accept", asList(MediaTypes.HAL_JSON_VALUE));
+        return execution.execute(wrapped, body);
+    }
 }

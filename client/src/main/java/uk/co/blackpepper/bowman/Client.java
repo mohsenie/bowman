@@ -34,141 +34,139 @@ import static uk.co.blackpepper.bowman.ReflectionSupport.setId;
  *
  * <p>Entities can contain simple (directly mappable to JSON) properties, and inline or
  * linked associations to further objects.
- * 
+ *
  * <p><code>Client</code>s are created via {@link ClientFactory#create}.
  *
  * @param <T> the entity type for this client
- * 
  * @author Ryan Pickett
- * 
  */
-public class Client<T>{
+public class Client<T> {
 
-	private final Class<T> entityType;
+    private final Class<T> entityType;
 
-	private final URI baseUri;
-	
-	private final ClientProxyFactory proxyFactory;
+    private final URI baseUri;
 
-	private final RestOperations restOperations;
+    private final ClientProxyFactory proxyFactory;
 
-	Client(Class<T> entityType, Configuration configuration, RestOperations restOperations,
-			ClientProxyFactory proxyFactory) {
-		this.entityType = entityType;
-		this.baseUri = getEntityBaseUri(entityType, configuration);
-		this.proxyFactory = proxyFactory;
-		this.restOperations = restOperations;		
-	}
-	
-	/**
-	 * GET a single entity from the entity's base resource (determined by the class's
-	 * {@link uk.co.blackpepper.bowman.annotation.RemoteResource} annotation).
-	 *
-	 * @return the entity, or null if not found
-	 */
-	public T get() {
-		return get(baseUri);
-	}
-	
-	/**
-	 * GET a single entity located at the given URI. 
-	 * 
-	 * @param uri the URI from which to retrieve the entity
-	 * @return the entity, or null if not found
-	 */
-	public T get(URI uri) {
-		Resource<T> resource = restOperations.getResource(uri, entityType);
-		
-		if (resource == null) {
-			return null;
-		}
-		
-		return proxyFactory.create(resource, restOperations);
-	}
+    private final RestOperations restOperations;
 
-	/**
-	 * GET a collection of entities from the entity's base resource (determined by the class's
-	 * {@link uk.co.blackpepper.bowman.annotation.RemoteResource} annotation). 
-	 * 
-	 * @return the entities retrieved
-	 */
-	public Iterable<T> getAll() {
-		return getAll(baseUri);
-	}
-	
-	/**
-	 * GET a collection of entities from the given URI.
-	 * 
-	 * @param uri the URI from which to retrieve the entities
-	 * @return the entities retrieved
-	 */
-	public Iterable<T> getAll(URI uri) {
-		List<T> result = new ArrayList<>();
+    Client(Class<T> entityType, Configuration configuration, RestOperations restOperations,
+           ClientProxyFactory proxyFactory) {
+        this.entityType = entityType;
+        this.baseUri = getEntityBaseUri(entityType, configuration);
+        this.proxyFactory = proxyFactory;
+        this.restOperations = restOperations;
+    }
 
-		Resources<Resource<T>> resources = restOperations.getResources(uri, entityType);
+    /**
+     * GET a single entity from the entity's base resource (determined by the class's
+     * {@link uk.co.blackpepper.bowman.annotation.RemoteResource} annotation).
+     *
+     * @return the entity, or null if not found
+     */
+    public T get() {
+        return get(baseUri);
+    }
 
-		for (Resource<T> resource : resources) {
-			result.add(proxyFactory.create(resource, restOperations));
-		}
-		
-		return result;
-	}
-	
-	/**
-	 * POST the given entity to the entity's base resource (determined by the class's
-	 * {@link uk.co.blackpepper.bowman.annotation.RemoteResource} annotation).
-	 * 
-	 * The entity will be updated with the URI ID the remote service has assigned it.
-	 * 
-	 * @param object the entity to submit
-	 * @return the URI ID of the newly created remote entity
-	 */
-	public URI post(T object) {
-		URI resourceUri = restOperations.postForId(baseUri, object);
-		
-		setId(object, resourceUri);
-		
-		return resourceUri;
-	}
-	
-	/**
-	 * PUT the given entity to the entity's base resource (determined by the class's
-	 * {@link uk.co.blackpepper.bowman.annotation.RemoteResource} annotation).
-	 *
-	 * @param object the entity to submit
-	 */
-	public void put(T object) {
-		restOperations.put(getId(object), object);
-	}
+    /**
+     * GET a single entity located at the given URI.
+     *
+     * @param uri the URI from which to retrieve the entity
+     * @return the entity, or null if not found
+     */
+    public T get(URI uri) {
+        Resource<T> resource = restOperations.getResource(uri, entityType);
 
-	/**
-	 * DELETE the entity at the given URI.
-	 * 
-	 * @param uri a URI of the entity to delete 
-	 */
-	public void delete(URI uri) {
-		restOperations.delete(uri);
-	}
+        if (resource == null) {
+            return null;
+        }
 
-	/**
-	 * PATCH (partial update) of the entity at the given URI.
-	 *
-	 * @param uri a URI of the entity to update
-	 * @param patch any type that can be serialized to a set of changes, for example a Map
-	 * @return The patched entity, or null if no response content was returned
-	 */
-	public T patch(URI uri, Object patch) {
-		Resource<T> resource = restOperations.patchForResource(uri, patch, entityType);
+        return proxyFactory.create(resource, restOperations);
+    }
 
-		return proxyFactory.create(resource, restOperations);
-	}
-	
-	URI getBaseUri() {
-		return baseUri;
-	}
-	
-	private static URI getEntityBaseUri(Class<?> entityType, Configuration configuration) {
-		String path = entityType.getAnnotation(RemoteResource.class).value();
-		return UriComponentsBuilder.fromUri(configuration.getBaseUri()).path(path).build().toUri();
-	}	
+    /**
+     * GET a collection of entities from the entity's base resource (determined by the class's
+     * {@link uk.co.blackpepper.bowman.annotation.RemoteResource} annotation).
+     *
+     * @return the entities retrieved
+     */
+    public Iterable<T> getAll() {
+        return getAll(baseUri);
+    }
+
+    /**
+     * GET a collection of entities from the given URI.
+     *
+     * @param uri the URI from which to retrieve the entities
+     * @return the entities retrieved
+     */
+    public Iterable<T> getAll(URI uri) {
+        List<T> result = new ArrayList<>();
+
+        Resources<Resource<T>> resources = restOperations.getResources(uri, entityType);
+
+        for (Resource<T> resource : resources) {
+            result.add(proxyFactory.create(resource, restOperations));
+        }
+
+        return result;
+    }
+
+    /**
+     * POST the given entity to the entity's base resource (determined by the class's
+     * {@link uk.co.blackpepper.bowman.annotation.RemoteResource} annotation).
+     * <p>
+     * The entity will be updated with the URI ID the remote service has assigned it.
+     *
+     * @param object the entity to submit
+     * @return the URI ID of the newly created remote entity
+     */
+    public URI post(T object) {
+        URI resourceUri = restOperations.postForId(baseUri, object);
+
+        setId(object, resourceUri);
+
+        return resourceUri;
+    }
+
+    /**
+     * PUT the given entity to the entity's base resource (determined by the class's
+     * {@link uk.co.blackpepper.bowman.annotation.RemoteResource} annotation).
+     *
+     * @param object the entity to submit
+     */
+    public void put(T object) {
+        restOperations.put(getId(object), object);
+    }
+
+    /**
+     * DELETE the entity at the given URI.
+     *
+     * @param uri a URI of the entity to delete
+     */
+    public void delete(URI uri) {
+        restOperations.delete(uri);
+    }
+
+    /**
+     * PATCH (partial update) of the entity at the given URI.
+     *
+     * @param uri   a URI of the entity to update
+     * @param patch any type that can be serialized to a set of changes, for example a Map
+     * @return The patched entity, or null if no response content was returned
+     */
+    public T patch(URI uri, Object patch) {
+        Resource<T> resource = restOperations.patchForResource(uri, patch, entityType);
+
+        return proxyFactory.create(resource, restOperations);
+    }
+
+    URI getBaseUri() {
+        return baseUri;
+    }
+
+    private static URI getEntityBaseUri(Class<?> entityType, Configuration configuration) {
+        String path = entityType.getAnnotation(RemoteResource.class).value();
+        return UriComponentsBuilder.fromUri(configuration.getBaseUri()).path(path).build().toUri();
+    }
 }

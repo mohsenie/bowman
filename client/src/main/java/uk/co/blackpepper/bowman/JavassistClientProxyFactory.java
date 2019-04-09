@@ -26,51 +26,49 @@ import static java.util.Arrays.asList;
 
 class JavassistClientProxyFactory implements ClientProxyFactory {
 
-	@Override
-	public <T> T create(Resource<T> resource, RestOperations restOperations) {
-		@SuppressWarnings("unchecked")
-		Class<T> entityType = (Class<T>) resource.getContent().getClass();
-		
-		MethodHandlerChain handlerChain = new MethodHandlerChain(asList(
-			new ResourceIdMethodHandler(resource),
-			new LinkedResourceMethodHandler(resource, restOperations, this),
-			new SimplePropertyMethodHandler<>(resource)
-		));
-		
-		return createProxyInstance(entityType, handlerChain);
-	}
-	
-	private static <T> T createProxyInstance(Class<T> entityType, MethodHandlerChain handlerChain) {
-		ProxyFactory factory = new ProxyFactory();
-		if (ProxyFactory.isProxyClass(entityType)) {
-			factory.setInterfaces(getNonProxyInterfaces(entityType));
-			factory.setSuperclass(entityType.getSuperclass());
-		}
-		else {
-			factory.setSuperclass(entityType);
-		}
-		factory.setFilter(handlerChain);
-		
-		Class<?> clazz = factory.createClass();
-		T proxy = instantiateClass(clazz);
-		((Proxy) proxy).setHandler(handlerChain);
-		return proxy;
-	}
-	
-	private static Class[] getNonProxyInterfaces(Class<?> entityType) {
-		return Arrays.stream(entityType.getInterfaces())
-			.filter(i -> !Proxy.class.isAssignableFrom(i))
-			.toArray(Class[]::new);
-	}
-	
-	private static <T> T instantiateClass(Class<?> clazz) {
-		try {
-			@SuppressWarnings("unchecked")
-			T proxy = (T) clazz.newInstance();
-			return proxy;
-		}
-		catch (Exception exception) {
-			throw new ClientProxyException("couldn't create proxy instance of " + clazz, exception);
-		}
-	}
+    @Override
+    public <T> T create(Resource<T> resource, RestOperations restOperations) {
+        @SuppressWarnings("unchecked")
+        Class<T> entityType = (Class<T>) resource.getContent().getClass();
+
+        MethodHandlerChain handlerChain = new MethodHandlerChain(asList(
+                new ResourceIdMethodHandler(resource),
+                new LinkedResourceMethodHandler(resource, restOperations, this),
+                new SimplePropertyMethodHandler<>(resource)
+        ));
+
+        return createProxyInstance(entityType, handlerChain);
+    }
+
+    private static <T> T createProxyInstance(Class<T> entityType, MethodHandlerChain handlerChain) {
+        ProxyFactory factory = new ProxyFactory();
+        if (ProxyFactory.isProxyClass(entityType)) {
+            factory.setInterfaces(getNonProxyInterfaces(entityType));
+            factory.setSuperclass(entityType.getSuperclass());
+        } else {
+            factory.setSuperclass(entityType);
+        }
+        factory.setFilter(handlerChain);
+
+        Class<?> clazz = factory.createClass();
+        T proxy = instantiateClass(clazz);
+        ((Proxy) proxy).setHandler(handlerChain);
+        return proxy;
+    }
+
+    private static Class[] getNonProxyInterfaces(Class<?> entityType) {
+        return Arrays.stream(entityType.getInterfaces())
+                .filter(i -> !Proxy.class.isAssignableFrom(i))
+                .toArray(Class[]::new);
+    }
+
+    private static <T> T instantiateClass(Class<?> clazz) {
+        try {
+            @SuppressWarnings("unchecked")
+            T proxy = (T) clazz.newInstance();
+            return proxy;
+        } catch (Exception exception) {
+            throw new ClientProxyException("couldn't create proxy instance of " + clazz, exception);
+        }
+    }
 }

@@ -20,5 +20,5 @@ import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 
 interface ObjectMapperFactory {
 
-	ObjectMapper create(HandlerInstantiator instantiator);
+    ObjectMapper create(HandlerInstantiator instantiator);
 }

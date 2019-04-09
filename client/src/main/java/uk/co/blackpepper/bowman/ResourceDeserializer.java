@@ -20,60 +20,59 @@ import javassist.util.proxy.ProxyFactory;
 
 class ResourceDeserializer extends StdDeserializer<Resource<?>> implements ContextualDeserializer {
 
-	private static final long serialVersionUID = -7290132544264448620L;
-	
-	private TypeResolver typeResolver;
+    private static final long serialVersionUID = -7290132544264448620L;
 
-	private Configuration configuration;
+    private TypeResolver typeResolver;
 
-	ResourceDeserializer(Class<?> type, TypeResolver typeResolver, Configuration configuration) {
-		super(type);
-		this.typeResolver = typeResolver;
-		this.configuration = configuration;
-	}
-	
-	@Override
-	public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
-		Class<?> resourceContentType = ctxt.getContextualType().getBindings().getTypeParameters().get(0).getRawClass();
-		
-		return new ResourceDeserializer(resourceContentType, typeResolver, configuration);
-	}
+    private Configuration configuration;
 
-	@Override
-	public Resource<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-		ObjectNode node = p.readValueAs(ObjectNode.class);
+    ResourceDeserializer(Class<?> type, TypeResolver typeResolver, Configuration configuration) {
+        super(type);
+        this.typeResolver = typeResolver;
+        this.configuration = configuration;
+    }
 
-		ObjectMapper mapper = (ObjectMapper) p.getCodec();
+    @Override
+    public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
+        Class<?> resourceContentType = ctxt.getContextualType().getBindings().getTypeParameters().get(0).getRawClass();
 
-		ResourceSupport resource = mapper.convertValue(node, ResourceSupport.class);
-		Links links = new Links(resource.getLinks());
-		
-		Object content = mapper.convertValue(node, getResourceDeserializationType(links));
-		return new Resource<>(content, links);
-	}
-	
-	TypeResolver getTypeResolver() {
-		return typeResolver;
-	}
-	
-	Configuration getConfiguration() {
-		return configuration;
-	}
-	
-	private Class<?> getResourceDeserializationType(Links links) {
-		Class<?> resourceContentType = typeResolver.resolveType(handledType(), links, configuration);
-		
-		if (resourceContentType.isInterface()) {
-			ProxyFactory factory = new ProxyFactory();
-			factory.setInterfaces(new Class[] {resourceContentType});
-			resourceContentType = factory.createClass();
-		}
-		else if (Modifier.isAbstract(resourceContentType.getModifiers())) {
-			ProxyFactory factory = new ProxyFactory();
-			factory.setSuperclass(resourceContentType);
-			resourceContentType = factory.createClass();
-		}
-		
-		return resourceContentType;
-	}
+        return new ResourceDeserializer(resourceContentType, typeResolver, configuration);
+    }
+
+    @Override
+    public Resource<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        ObjectNode node = p.readValueAs(ObjectNode.class);
+
+        ObjectMapper mapper = (ObjectMapper) p.getCodec();
+
+        ResourceSupport resource = mapper.convertValue(node, ResourceSupport.class);
+        Links links = new Links(resource.getLinks());
+
+        Object content = mapper.convertValue(node, getResourceDeserializationType(links));
+        return new Resource<>(content, links);
+    }
+
+    TypeResolver getTypeResolver() {
+        return typeResolver;
+    }
+
+    Configuration getConfiguration() {
+        return configuration;
+    }
+
+    private Class<?> getResourceDeserializationType(Links links) {
+        Class<?> resourceContentType = typeResolver.resolveType(handledType(), links, configuration);
+
+        if (resourceContentType.isInterface()) {
+            ProxyFactory factory = new ProxyFactory();
+            factory.setInterfaces(new Class[]{resourceContentType});
+            resourceContentType = factory.createClass();
+        } else if (Modifier.isAbstract(resourceContentType.getModifiers())) {
+            ProxyFactory factory = new ProxyFactory();
+            factory.setSuperclass(resourceContentType);
+            resourceContentType = factory.createClass();
+        }
+
+        return resourceContentType;
+    }
 }
