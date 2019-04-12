@@ -15,20 +15,24 @@
  */
 package uk.co.blackpepper.bowman;
 
-import java.net.URI;
-import java.util.Collections;
-import java.util.Optional;
-
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
-
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
+import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.Collections;
+import java.util.Optional;
 
 class RestOperations {
 
@@ -36,6 +40,7 @@ class RestOperations {
 
     private final ObjectMapper objectMapper;
     private ClientFactoryCallBackInterface callbackInterface;
+    private Logger logger = LoggerFactory.getLogger(RestOperations.class);
 
     RestOperations(RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
@@ -50,7 +55,8 @@ class RestOperations {
         ObjectNode node;
 
         try {
-            node = restTemplate.getForObject(uri, ObjectNode.class);
+            node = getChachedObject(uri);
+            //node = restTemplate.getForObject(uri, ObjectNode.class);
         } catch (HttpClientErrorException exception) {
             if (exception.getStatusCode() == HttpStatus.NOT_FOUND) {
                 return null;
@@ -68,7 +74,8 @@ class RestOperations {
         ObjectNode node;
 
         try {
-            node = restTemplate.getForObject(uri, ObjectNode.class);
+            node = getChachedObject(uri);
+            //node = restTemplate.getForObject(uri, ObjectNode.class);
             JsonNode pageNode = node.get("page");
             JsonNode linksNode = node.get("_links");
 
@@ -131,5 +138,42 @@ class RestOperations {
 
     ObjectMapper getObjectMapper() {
         return objectMapper;
+    }
+
+    private ObjectNode getChachedObject(URI uri) {
+        ObjectNode node = null;
+
+        String etag = CacheManager.INSTANCE.getEatgForUrl(uri.toString());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        if(etag != null) {
+            headers.add("If-None-Match", etag);
+        }
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(map, headers);
+
+        ResponseEntity<ObjectNode> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, ObjectNode.class);
+
+        node = result.getBody();
+
+        if (result.getStatusCode() == HttpStatus.NOT_MODIFIED) {
+            //if response status is 303 then try to load the contents from cache
+            try {
+                node = objectMapper.readValue(CacheManager.INSTANCE.getCacheForUrl(uri.toString()), ObjectNode.class);
+            } catch (IOException e) {
+                logger.error("failed reading object bytes from cache : " + e.getMessage());
+                logger.info("calling cache manager to evict cache to the url");
+                CacheManager.INSTANCE.evictCacheForUrl(uri.toString());
+            }
+        } else {
+            try {
+                logger.info("calling cache manager to persist object.");
+                CacheManager.INSTANCE.writeCacheForUrl(uri.toString(), result.getHeaders().getETag(), objectMapper.writeValueAsBytes(node));
+            } catch (IOException e) {
+                logger.error("failed to convert response object to byte array : " + e.getMessage());
+            }
+        }
+        return node;
     }
 }
