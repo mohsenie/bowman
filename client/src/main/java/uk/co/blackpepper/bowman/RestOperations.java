@@ -40,7 +40,7 @@ class RestOperations {
 
     private final ObjectMapper objectMapper;
     private ClientFactoryCallBackInterface callbackInterface;
-    private Logger logger = LoggerFactory.getLogger(RestOperations.class);
+    private static final Logger logger = LoggerFactory.getLogger(RestOperations.class);
 
     RestOperations(RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
@@ -163,7 +163,7 @@ class RestOperations {
                 node = objectMapper.readValue(CacheManager.INSTANCE.getCacheForUrl(uri.toString()), ObjectNode.class);
             } catch (IOException e) {
                 logger.error("failed reading object bytes from cache : " + e.getMessage());
-                logger.info("calling cache manager to evict cache to the url");
+                logger.info("calling cache manager to evict cache for the url");
                 CacheManager.INSTANCE.evictCacheForUrl(uri.toString());
             }
         } else {
@@ -171,7 +171,7 @@ class RestOperations {
                 logger.info("calling cache manager to persist object.");
                 CacheManager.INSTANCE.writeCacheForUrl(uri.toString(), result.getHeaders().getETag(), objectMapper.writeValueAsBytes(node));
             } catch (IOException e) {
-                logger.error("failed to convert response object to byte array : " + e.getMessage());
+                logger.error("failed converting response object to byte array : " + e.getMessage());
             }
         }
         return node;

@@ -17,7 +17,7 @@ public enum CacheManager {
     private String dbUser = "dbUser";
     private String dbPassword = "secret";
     private Connection conn;
-    private Logger logger = LoggerFactory.getLogger(CacheManager.class);
+    private final Logger logger = LoggerFactory.getLogger(CacheManager.class);
 
     private String tableName = "HTTP_CACHE";
 
@@ -87,7 +87,7 @@ public enum CacheManager {
             logger.info("Returning object from cache for " + url);
             return IOUtils.toByteArray(rs.getBinaryStream("RESPONSE_OBJECT"));
         } catch (SQLException | IOException ex) {
-            logger.error("Error reading object from cache. possible cache miss for url " + url + " : " + ex.getMessage());
+            logger.error("Error reading object from cache or cache miss url " + url + " : " + ex.getMessage());
         }
         return null;
     }
@@ -112,7 +112,7 @@ public enum CacheManager {
             stmt.execute(evictCache);
             logger.info("Evicting all cache");
         } catch (SQLException ex) {
-            logger.error("Error evicting cache: " + ex.getMessage());
+            logger.error("Error evicting all cache: " + ex.getMessage());
         }
     }
 
