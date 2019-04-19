@@ -98,7 +98,7 @@ public enum CacheManager {
             getCacheByUrlStmt.setString(1, url);
             ResultSet rs = getCacheByUrlStmt.executeQuery();
             rs.first();
-            logger.info("Url exist in each and has Etag " + url);
+            logger.info("Url exist in cache and has Etag " + url);
             return rs.getString("ETAG");
         } catch (SQLException ex) {
             logger.error("Error reading Etag for " + url + " : " + ex.getMessage());
