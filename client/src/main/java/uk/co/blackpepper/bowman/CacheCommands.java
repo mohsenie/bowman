@@ -11,7 +11,7 @@ import java.sql.*;
 
 public class CacheCommands implements CacheCommandsInterface{
 
-    private final Logger logger = LoggerFactory.getLogger(DefaultCacheManager.class);
+    private final Logger logger = LoggerFactory.getLogger(CacheCommands.class);
     private final Connection conn;
     private final String tableName;
 
