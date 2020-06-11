@@ -41,10 +41,12 @@ class RestOperations {
     private final ObjectMapper objectMapper;
     private ClientFactoryCallBackInterface callbackInterface;
     private static final Logger logger = LoggerFactory.getLogger(RestOperations.class);
+    private final CacheCommandsInterface cacheManagerInterface;
 
-    RestOperations(RestTemplate restTemplate, ObjectMapper objectMapper) {
+    RestOperations(RestTemplate restTemplate, ObjectMapper objectMapper, CacheCommandsInterface cacheManagerInterface) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+        this.cacheManagerInterface = cacheManagerInterface;
     }
 
     public void setCallbackInterface(ClientFactoryCallBackInterface callbackInterface) {
@@ -55,7 +57,7 @@ class RestOperations {
         ObjectNode node;
 
         try {
-            node = getChachedObject(uri);
+            node = getCachedObject(uri);
             //node = restTemplate.getForObject(uri, ObjectNode.class);
         } catch (HttpClientErrorException exception) {
             if (exception.getStatusCode() == HttpStatus.NOT_FOUND) {
@@ -74,7 +76,7 @@ class RestOperations {
         ObjectNode node;
 
         try {
-            node = getChachedObject(uri);
+            node = getCachedObject(uri);
             //node = restTemplate.getForObject(uri, ObjectNode.class);
             JsonNode pageNode = node.get("page");
             JsonNode linksNode = node.get("_links");
@@ -95,7 +97,7 @@ class RestOperations {
             }
         } catch (HttpClientErrorException exception) {
             if (exception.getStatusCode() == HttpStatus.NOT_FOUND) {
-                return Resources.wrap(Collections.<T>emptyList());
+                return Resources.wrap(Collections.emptyList());
             }
 
             throw exception;
@@ -140,17 +142,17 @@ class RestOperations {
         return objectMapper;
     }
 
-    private ObjectNode getChachedObject(URI uri) {
-        ObjectNode node = null;
+    private ObjectNode getCachedObject(URI uri) {
+        ObjectNode node;
 
-        String etag = CacheManager.INSTANCE.getEatgForUrl(uri.toString());
+        String etag = cacheManagerInterface.getEatgForUrl(uri.toString());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         if(etag != null) {
             headers.add("If-None-Match", etag);
         }
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(map, headers);
 
         ResponseEntity<ObjectNode> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, ObjectNode.class);
@@ -160,16 +162,16 @@ class RestOperations {
         if (result.getStatusCode() == HttpStatus.NOT_MODIFIED) {
             //if response status is 303 then try to load the contents from cache
             try {
-                node = objectMapper.readValue(CacheManager.INSTANCE.getCacheForUrl(uri.toString()), ObjectNode.class);
+                node = objectMapper.readValue(cacheManagerInterface.getCacheForUrl(uri.toString()), ObjectNode.class);
             } catch (IOException e) {
                 logger.error("failed reading object bytes from cache : " + e.getMessage());
                 logger.info("calling cache manager to evict cache for the url");
-                CacheManager.INSTANCE.evictCacheForUrl(uri.toString());
+                cacheManagerInterface.evictCacheForUrl(uri.toString());
             }
         } else {
             try {
                 logger.info("calling cache manager to persist object.");
-                CacheManager.INSTANCE.writeCacheForUrl(uri.toString(), result.getHeaders().getETag(), objectMapper.writeValueAsBytes(node));
+                cacheManagerInterface.writeCacheForUrl(uri.toString(), result.getHeaders().getETag(), objectMapper.writeValueAsBytes(node));
             } catch (IOException e) {
                 logger.error("failed converting response object to byte array : " + e.getMessage());
             }

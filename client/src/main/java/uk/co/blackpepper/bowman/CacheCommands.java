@@ -9,48 +9,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
 
-public enum CacheManager {
-    INSTANCE;
+public class CacheCommands implements CacheCommandsInterface{
 
-    private String tempDir = System.getProperty("java.io.tmpdir");
-    private String db = "jdbc:h2:"+tempDir+"/suppliersDatabaseCache";
-    private String dbUser = "dbUser";
-    private String dbPassword = "secret";
-    private Connection conn;
-    private final Logger logger = LoggerFactory.getLogger(CacheManager.class);
+    private final Logger logger = LoggerFactory.getLogger(DefaultCacheManager.class);
+    private final Connection conn;
+    private final String tableName;
 
-    private String tableName = "HTTP_CACHE";
+    private final String getEtagByUrlQuery = "SELECT ETAG FROM  %s  WHERE URL=?";
 
-    private String getCacheByUrlQuery = "SELECT RESPONSE_OBJECT FROM " + tableName + " WHERE URL=?";
-    private String getEtagByUrlQuery = "SELECT ETAG FROM " + tableName + " WHERE URL=?";
-    private String insertCacheByUrlQuery = "INSERT INTO " + tableName + " VALUES(?, ?, ?)";
-    private String updateCacheByUrlQuery = "UPDATE " + tableName + " SET ETAG=?, RESPONSE_OBJECT=? WHERE URL=?";
-    private String evictCache = "DELETE FROM " + tableName;
-
-    private CacheManager() {
-        try {
-            conn = DriverManager.getConnection(db, dbUser, dbPassword);
-            DatabaseMetaData dbm = conn.getMetaData();
-            ResultSet rs = dbm.getTables(null, null, tableName, null);
-
-            if (rs.next()) {
-                logger.info("Cache table already exist.");
-            } else {
-                logger.info("Cache table does not exist. creating it now.");
-                Statement stmt = conn.createStatement();
-                String CreateTableQuery = "CREATE TABLE " + tableName + " (URL CLOB NULL, ETAG CLOB NULL, RESPONSE_OBJECT BLOB NULL)";
-                stmt.execute(CreateTableQuery);
-            }
-        } catch (SQLException e) {
-            logger.error("Error creating cache database: " + e.getMessage());
-        }
+    public CacheCommands(Connection newConnection, String tableName){
+        conn = newConnection;
+        this.tableName = tableName;
     }
 
     public void writeCacheForUrl(String url, String etag, byte[] ResponseObject) {
         try {
             // if we have the url in cache then update it.
             if (getCacheForUrl(url) != null) {
-                PreparedStatement preparedStmt = conn.prepareStatement(updateCacheByUrlQuery);
+                String updateCacheByUrlQuery = "UPDATE %s SET ETAG=?, RESPONSE_OBJECT=? WHERE URL=?";
+                PreparedStatement preparedStmt = conn.prepareStatement(String.format(updateCacheByUrlQuery, tableName));
                 preparedStmt.setString(1, etag);
 
                 InputStream ResponseObjectStream = new ByteArrayInputStream(ResponseObject);
@@ -62,7 +39,8 @@ public enum CacheManager {
                 preparedStmt.executeUpdate();
             } else {
                 // we do not have the url cached then insert it
-                PreparedStatement preparedStmt = conn.prepareStatement(insertCacheByUrlQuery);
+                String insertCacheByUrlQuery = "INSERT INTO  %s VALUES(?, ?, ?)";
+                PreparedStatement preparedStmt = conn.prepareStatement(String.format(insertCacheByUrlQuery, tableName));
 
                 preparedStmt.setString(1, url);
                 preparedStmt.setString(2, etag);
@@ -80,7 +58,8 @@ public enum CacheManager {
 
     public byte[] getCacheForUrl(String url) {
         try {
-            PreparedStatement getCacheByUrlStmt = conn.prepareStatement(getCacheByUrlQuery);
+            String getCacheByUrlQuery = "SELECT RESPONSE_OBJECT FROM %s WHERE URL=?";
+            PreparedStatement getCacheByUrlStmt = conn.prepareStatement(String.format(getCacheByUrlQuery, tableName));
             getCacheByUrlStmt.setString(1, url);
             ResultSet rs = getCacheByUrlStmt.executeQuery();
             rs.first();
@@ -94,7 +73,7 @@ public enum CacheManager {
 
     public String getEatgForUrl(String url) {
         try {
-            PreparedStatement getCacheByUrlStmt = conn.prepareStatement(getEtagByUrlQuery);
+            PreparedStatement getCacheByUrlStmt = conn.prepareStatement(String.format(getEtagByUrlQuery, tableName));
             getCacheByUrlStmt.setString(1, url);
             ResultSet rs = getCacheByUrlStmt.executeQuery();
             rs.first();
@@ -109,6 +88,7 @@ public enum CacheManager {
     public void evictCache() {
         try {
             Statement stmt = conn.createStatement();
+            String evictCache = "DELETE FROM %s";
             stmt.execute(evictCache);
             logger.info("Evicting all cache");
         } catch (SQLException ex) {
@@ -118,7 +98,7 @@ public enum CacheManager {
 
     public void evictCacheForUrl(String url) {
         try {
-            PreparedStatement getCacheByUrlStmt = conn.prepareStatement(getEtagByUrlQuery);
+            PreparedStatement getCacheByUrlStmt = conn.prepareStatement(String.format(getEtagByUrlQuery, tableName));
             getCacheByUrlStmt.setString(1, url);
             getCacheByUrlStmt.executeQuery();
             logger.info("Evicting cache for url " + url);

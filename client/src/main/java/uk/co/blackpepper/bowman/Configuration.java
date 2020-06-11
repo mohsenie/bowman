@@ -42,6 +42,8 @@ public final class Configuration {
 
         private ClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
 
+        private CacheCommandsInterface cacheManagerInterface = DefaultCacheManager.INSTANCE.getCacheCommands(); // setting a default cache manager
+
         private Builder() {
         }
 
@@ -110,6 +112,20 @@ public final class Configuration {
         }
 
         /**
+         * Set the <code>CacheManagerInterface</code> for the created configuration.
+         *
+         * <p><b>N.B.</b> this is an optional cache manager interface which if passed into the configuration
+         * will enable caching of requests.
+         *
+         * @param cacheManagerInterface the <code>CacheManagerInterface</code>
+         * @return this builder
+         */
+        public Builder setCacheManagerInterface(CacheCommandsInterface cacheManagerInterface) {
+            this.cacheManagerInterface = cacheManagerInterface;
+            return this;
+        }
+
+        /**
          * Set the <code>ObjectMapperConfigurer</code> for the created configuration. Allows
          * further configuration of the Jackson <code>ObjectMapper</code> used internally.
          *
@@ -130,11 +146,14 @@ public final class Configuration {
 
     private final ObjectMapperConfigurer objectMapperConfigurer;
 
+    private final CacheCommandsInterface cacheManagerInterface;
+
     private Configuration(Builder builder) {
         baseUri = builder.baseUri;
         restTemplateConfigurer = builder.restTemplateConfigurer;
         clientHttpRequestFactory = builder.clientHttpRequestFactory;
         objectMapperConfigurer = builder.objectMapperConfigurer;
+        cacheManagerInterface = builder.cacheManagerInterface;
     }
 
     /**
@@ -198,5 +217,14 @@ public final class Configuration {
      */
     public ObjectMapperConfigurer getObjectMapperConfigurer() {
         return objectMapperConfigurer;
+    }
+
+    /**
+     * Get the <code>CacheManagerInterface</code> for this configuration.
+     *
+     * @return the configuration's <code>CacheManagerInterface</code>.
+     */
+    public CacheCommandsInterface getCacheManagerInterface() {
+        return cacheManagerInterface;
     }
 }

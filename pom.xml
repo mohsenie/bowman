@@ -136,11 +136,7 @@
 					<value>!true</value>
 				</property>
 			</activation>
-			
-			<properties>
-				<skipNexusStagingDeployMojo>${isReleaseVersion}</skipNexusStagingDeployMojo>
-			</properties>
-			
+
 			<build>
 				<plugins>
 					<plugin>

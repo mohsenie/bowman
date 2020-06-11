@@ -19,8 +19,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import uk.co.blackpepper.bowman.Client;
+import uk.co.blackpepper.bowman.ClientFactoryCallBackInterface;
+import uk.co.blackpepper.bowman.Pagination;
 import uk.co.blackpepper.bowman.test.it.model.CustomRelEntity;
 import uk.co.blackpepper.bowman.test.it.model.SimpleEntity;
+
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -33,8 +37,28 @@ public class CustomRelIT extends AbstractIT {
 	
 	@Before
 	public void setup() {
-		client = clientFactory.create(CustomRelEntity.class);
-		simpleEntityClient = clientFactory.create(SimpleEntity.class);
+		client = clientFactory.create(CustomRelEntity.class, new ClientFactoryCallBackInterface() {
+			@Override
+			public void setPagination(Pagination pagination) {
+
+			}
+
+			@Override
+			public Optional<Pagination> getPagination() {
+				return Optional.empty();
+			}
+		});
+		simpleEntityClient = clientFactory.create(SimpleEntity.class, new ClientFactoryCallBackInterface() {
+			@Override
+			public void setPagination(Pagination pagination) {
+
+			}
+
+			@Override
+			public Optional<Pagination> getPagination() {
+				return Optional.empty();
+			}
+		});
 	}
 	
 	@Test

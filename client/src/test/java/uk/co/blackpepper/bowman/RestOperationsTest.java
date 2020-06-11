@@ -81,7 +81,7 @@ public class RestOperationsTest {
 		restTemplate = mock(RestTemplate.class);
 		objectMapper = new DefaultObjectMapperFactory().create(instantiator);
 
-		restOperations = new RestOperations(restTemplate, objectMapper);
+		restOperations = new RestOperations(restTemplate, objectMapper, mock(CacheCommandsInterface.class));
 	}
 
 	@Test

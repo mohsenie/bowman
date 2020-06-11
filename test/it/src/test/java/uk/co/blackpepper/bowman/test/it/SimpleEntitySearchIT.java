@@ -1,11 +1,14 @@
 package uk.co.blackpepper.bowman.test.it;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import uk.co.blackpepper.bowman.Client;
+import uk.co.blackpepper.bowman.ClientFactoryCallBackInterface;
+import uk.co.blackpepper.bowman.Pagination;
 import uk.co.blackpepper.bowman.test.it.model.SimpleEntity;
 import uk.co.blackpepper.bowman.test.it.model.SimpleEntitySearch;
 
@@ -20,8 +23,28 @@ public class SimpleEntitySearchIT extends AbstractIT {
 	
 	@Before
 	public void setup() {
-		entities = clientFactory.create(SimpleEntity.class);
-		search = clientFactory.create(SimpleEntitySearch.class);
+		entities = clientFactory.create(SimpleEntity.class, new ClientFactoryCallBackInterface() {
+			@Override
+			public void setPagination(Pagination pagination) {
+
+			}
+
+			@Override
+			public Optional<Pagination> getPagination() {
+				return Optional.empty();
+			}
+		});
+		search = clientFactory.create(SimpleEntitySearch.class, new ClientFactoryCallBackInterface() {
+			@Override
+			public void setPagination(Pagination pagination) {
+
+			}
+
+			@Override
+			public Optional<Pagination> getPagination() {
+				return Optional.empty();
+			}
+		});
 	}
 	
 	@Test

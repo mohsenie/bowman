@@ -2,6 +2,7 @@ package uk.co.blackpepper.bowman.test.it;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -9,6 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import uk.co.blackpepper.bowman.Client;
+import uk.co.blackpepper.bowman.ClientFactoryCallBackInterface;
+import uk.co.blackpepper.bowman.Pagination;
 import uk.co.blackpepper.bowman.test.it.model.HierarchyBaseEntity;
 import uk.co.blackpepper.bowman.test.it.model.HierarchyDerivedEntity1;
 import uk.co.blackpepper.bowman.test.it.model.HierarchyDerivedEntity2;
@@ -34,10 +37,50 @@ public class HierarchyIT extends AbstractIT {
 	
 	@Before
 	public void setUp() {
-		baseEntityClient = clientFactory.create(HierarchyBaseEntity.class);
-		derivedEntity1Client = clientFactory.create(HierarchyDerivedEntity1.class);
-		derivedEntity2Client = clientFactory.create(HierarchyDerivedEntity2.class);
-		propertyEntityClient = clientFactory.create(HierarchyPropertyEntity.class);
+		baseEntityClient = clientFactory.create(HierarchyBaseEntity.class, new ClientFactoryCallBackInterface() {
+			@Override
+			public void setPagination(Pagination pagination) {
+
+			}
+
+			@Override
+			public Optional<Pagination> getPagination() {
+				return Optional.empty();
+			}
+		});
+		derivedEntity1Client = clientFactory.create(HierarchyDerivedEntity1.class, new ClientFactoryCallBackInterface() {
+			@Override
+			public void setPagination(Pagination pagination) {
+
+			}
+
+			@Override
+			public Optional<Pagination> getPagination() {
+				return Optional.empty();
+			}
+		});
+		derivedEntity2Client = clientFactory.create(HierarchyDerivedEntity2.class, new ClientFactoryCallBackInterface() {
+			@Override
+			public void setPagination(Pagination pagination) {
+
+			}
+
+			@Override
+			public Optional<Pagination> getPagination() {
+				return Optional.empty();
+			}
+		});
+		propertyEntityClient = clientFactory.create(HierarchyPropertyEntity.class, new ClientFactoryCallBackInterface() {
+			@Override
+			public void setPagination(Pagination pagination) {
+
+			}
+
+			@Override
+			public Optional<Pagination> getPagination() {
+				return Optional.empty();
+			}
+		});
 	}
 	
 	@Test
@@ -52,12 +95,12 @@ public class HierarchyIT extends AbstractIT {
 		
 		Iterable<HierarchyBaseEntity> retrieved = baseEntityClient.getAll();
 		
-		assertThat(retrieved, containsInAnyOrder(Arrays.<Matcher<? super HierarchyBaseEntity>>asList(
-			Matchers.<HierarchyBaseEntity>allOf(
+		assertThat(retrieved, containsInAnyOrder(Arrays.asList(
+			Matchers.allOf(
 				instanceOf(HierarchyDerivedEntity1.class),
 				hasProperty("entity1Field", is("x"))
 			),
-			Matchers.<HierarchyBaseEntity>allOf(
+			Matchers.allOf(
 				instanceOf(HierarchyDerivedEntity2.class),
 				hasProperty("entity2Field", is("y"))
 			)
@@ -76,7 +119,7 @@ public class HierarchyIT extends AbstractIT {
 		
 		HierarchyPropertyEntity retrieved = propertyEntityClient.get(propertyEntityUri);
 		
-		assertThat(retrieved.getLinkedEntity(), Matchers.<HierarchyBaseEntity>allOf(
+		assertThat(retrieved.getLinkedEntity(), Matchers.allOf(
 			instanceOf(HierarchyDerivedEntity1.class),
 			hasProperty("entity1Field", is("x"))
 		));
@@ -99,12 +142,12 @@ public class HierarchyIT extends AbstractIT {
 		HierarchyPropertyEntity retrieved = propertyEntityClient.get(propertyEntityUri);
 		
 		assertThat(retrieved.getLinkedEntityCollection(),
-			containsInAnyOrder(Arrays.<Matcher<? super HierarchyBaseEntity>>asList(
-				Matchers.<HierarchyBaseEntity>allOf(
+			containsInAnyOrder(Arrays.asList(
+				Matchers.allOf(
 					instanceOf(HierarchyDerivedEntity1.class),
 					hasProperty("entity1Field", is("x"))
 				),
-				Matchers.<HierarchyBaseEntity>allOf(
+				Matchers.allOf(
 					instanceOf(HierarchyDerivedEntity2.class),
 					hasProperty("entity2Field", is("y"))
 				)

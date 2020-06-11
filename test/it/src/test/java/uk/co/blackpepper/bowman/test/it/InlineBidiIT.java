@@ -16,11 +16,14 @@
 package uk.co.blackpepper.bowman.test.it;
 
 import java.net.URI;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import uk.co.blackpepper.bowman.Client;
+import uk.co.blackpepper.bowman.ClientFactoryCallBackInterface;
+import uk.co.blackpepper.bowman.Pagination;
 import uk.co.blackpepper.bowman.test.it.model.InlineBidiChildEntity;
 import uk.co.blackpepper.bowman.test.it.model.InlineBidiParentEntity;
 import uk.co.blackpepper.bowman.test.it.model.SimpleEntity;
@@ -36,8 +39,28 @@ public class InlineBidiIT extends AbstractIT {
 	
 	@Before
 	public void setup() {
-		client = clientFactory.create(InlineBidiParentEntity.class);
-		simpleEntityClient = clientFactory.create(SimpleEntity.class);
+		client = clientFactory.create(InlineBidiParentEntity.class, new ClientFactoryCallBackInterface() {
+			@Override
+			public void setPagination(Pagination pagination) {
+
+			}
+
+			@Override
+			public Optional<Pagination> getPagination() {
+				return Optional.empty();
+			}
+		});
+		simpleEntityClient = clientFactory.create(SimpleEntity.class, new ClientFactoryCallBackInterface() {
+			@Override
+			public void setPagination(Pagination pagination) {
+
+			}
+
+			@Override
+			public Optional<Pagination> getPagination() {
+				return Optional.empty();
+			}
+		});
 	}
 	
 	@Test

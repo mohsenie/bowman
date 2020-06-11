@@ -1,6 +1,7 @@
 package uk.co.blackpepper.bowman.test.it;
 
 import java.net.URI;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -8,6 +9,8 @@ import org.junit.Test;
 import com.google.common.collect.Sets;
 
 import uk.co.blackpepper.bowman.Client;
+import uk.co.blackpepper.bowman.ClientFactoryCallBackInterface;
+import uk.co.blackpepper.bowman.Pagination;
 import uk.co.blackpepper.bowman.test.it.model.NullLinkedCollectionEntity;
 import uk.co.blackpepper.bowman.test.it.model.SimpleEntity;
 
@@ -24,8 +27,28 @@ public class NullLinkedCollectionIT extends AbstractIT {
 	
 	@Before
 	public void setUp() {
-		client = clientFactory.create(NullLinkedCollectionEntity.class);
-		simpleEntityClient = clientFactory.create(SimpleEntity.class);
+		client = clientFactory.create(NullLinkedCollectionEntity.class, new ClientFactoryCallBackInterface() {
+			@Override
+			public void setPagination(Pagination pagination) {
+
+			}
+
+			@Override
+			public Optional<Pagination> getPagination() {
+				return Optional.empty();
+			}
+		});
+		simpleEntityClient = clientFactory.create(SimpleEntity.class, new ClientFactoryCallBackInterface() {
+			@Override
+			public void setPagination(Pagination pagination) {
+
+			}
+
+			@Override
+			public Optional<Pagination> getPagination() {
+				return Optional.empty();
+			}
+		});
 	}
 	
 	@Test

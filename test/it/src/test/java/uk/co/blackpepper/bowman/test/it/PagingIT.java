@@ -16,6 +16,7 @@
 package uk.co.blackpepper.bowman.test.it;
 
 import java.net.URI;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -23,6 +24,8 @@ import org.junit.Test;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import uk.co.blackpepper.bowman.Client;
+import uk.co.blackpepper.bowman.ClientFactoryCallBackInterface;
+import uk.co.blackpepper.bowman.Pagination;
 import uk.co.blackpepper.bowman.test.it.model.PageableEntity;
 import uk.co.blackpepper.bowman.test.it.model.PageableEntityResultPage;
 
@@ -37,8 +40,28 @@ public class PagingIT extends AbstractIT {
 
 	@Before
 	public void setup() {
-		entityClient = clientFactory.create(PageableEntity.class);
-		pageClient = clientFactory.create(PageableEntityResultPage.class);
+		entityClient = clientFactory.create(PageableEntity.class, new ClientFactoryCallBackInterface() {
+			@Override
+			public void setPagination(Pagination pagination) {
+
+			}
+
+			@Override
+			public Optional<Pagination> getPagination() {
+				return Optional.empty();
+			}
+		});
+		pageClient = clientFactory.create(PageableEntityResultPage.class, new ClientFactoryCallBackInterface() {
+			@Override
+			public void setPagination(Pagination pagination) {
+
+			}
+
+			@Override
+			public Optional<Pagination> getPagination() {
+				return Optional.empty();
+			}
+		});
 	}
 
 	@Test

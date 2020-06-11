@@ -36,7 +36,6 @@ public class ClientFactory {
 
     ClientFactory(Configuration configuration, ClientProxyFactory proxyFactory) {
         this.configuration = configuration;
-
         this.proxyFactory = proxyFactory;
         this.restOperations = new RestOperationsFactory(configuration, proxyFactory).create();
     }
