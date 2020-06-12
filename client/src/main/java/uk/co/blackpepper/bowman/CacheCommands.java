@@ -22,7 +22,7 @@ public class CacheCommands implements CacheCommandsInterface{
         this.tableName = tableName;
     }
 
-    public void writeCacheForUrl(String url, String etag, byte[] ResponseObject) {
+    public void writeCacheForUrl(String url, String etag, byte[] responseObject) {
         try {
             // if we have the url in cache then update it.
             if (getCacheForUrl(url) != null) {
@@ -30,8 +30,8 @@ public class CacheCommands implements CacheCommandsInterface{
                 PreparedStatement preparedStmt = conn.prepareStatement(String.format(updateCacheByUrlQuery, tableName));
                 preparedStmt.setString(1, etag);
 
-                InputStream ResponseObjectStream = new ByteArrayInputStream(ResponseObject);
-                preparedStmt.setBinaryStream(2, ResponseObjectStream);
+                InputStream responseObjectStream = new ByteArrayInputStream(responseObject);
+                preparedStmt.setBinaryStream(2, responseObjectStream);
 
                 preparedStmt.setString(3, url);
 
@@ -45,8 +45,8 @@ public class CacheCommands implements CacheCommandsInterface{
                 preparedStmt.setString(1, url);
                 preparedStmt.setString(2, etag);
 
-                InputStream ResponseObjectStream = new ByteArrayInputStream(ResponseObject);
-                preparedStmt.setBinaryStream(3, ResponseObjectStream);
+                InputStream responseObjectStream = new ByteArrayInputStream(responseObject);
+                preparedStmt.setBinaryStream(3, responseObjectStream);
 
                 logger.info("inserting new object to cache for url: " + url);
                 preparedStmt.execute();

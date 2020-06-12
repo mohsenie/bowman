@@ -44,9 +44,9 @@ public enum DefaultCacheManager {
         return conn;
     }
 
-    public CacheCommands setConnection(Connection newConn) {
+    public CacheCommands setConnection(Connection newConn, String cacheTableName) {
         if(this.cacheCommands == null) {
-            this.cacheCommands = new CacheCommands(newConn, defaultTableName);
+            this.cacheCommands = new CacheCommands(newConn, cacheTableName);
         }
         return this.cacheCommands;
     }
