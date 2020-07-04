@@ -56,7 +56,7 @@ class RestOperationsFactory {
                 configuration.getObjectMapperConfigurer().configure(objectMapper);
             }
 
-            restOperations = new RestOperations(restTemplate, objectMapper, configuration.getCacheManagerInterface());
+            restOperations = new RestOperations(restTemplate, objectMapper, configuration.getCacheManagerInterface(), false);
 
             handlerMap.put(ResourceDeserializer.class,
                     new ResourceDeserializer(Object.class, new DefaultTypeResolver(), configuration));
