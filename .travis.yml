@@ -10,7 +10,7 @@ before_script:
       PHASES="deploy"
     fi
 script: mvn -s config/settings.ci.xml $PHASES -PrunITs
-after_success: mvn test jacoco:report coveralls:report -pl :bowman-client
+after_success: mvn test jacoco:report coveralls:report -pl :bowman-client-with-http-caching
 deploy:
   provider: pages
   local-dir: client/target/generated-docs

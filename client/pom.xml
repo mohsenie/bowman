@@ -24,7 +24,7 @@
         <version>0.6.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>bowman-client</artifactId>
+    <artifactId>bowman-client-with-http-caching</artifactId>
 
     <build>
         <plugins>
