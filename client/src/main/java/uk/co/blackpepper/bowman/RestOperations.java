@@ -82,8 +82,10 @@ class RestOperations {
 
         try {
             if(!disableCache) {
+                logger.info("Cache is enabled");
                 node = getCachedObject(uri);
             }else {
+                logger.info("Cache is is disabled");
                 node = restTemplate.getForObject(uri, ObjectNode.class);
             }
             JsonNode pageNode = node.get("page");
