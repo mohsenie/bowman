@@ -14,12 +14,14 @@ public class CacheCommands implements CacheCommandsInterface{
     private final Logger logger = LoggerFactory.getLogger(CacheCommands.class);
     private final Connection conn;
     private final String tableName;
+    private final boolean enableCache;
 
     private final String getEtagByUrlQuery = "SELECT ETAG FROM  %s  WHERE URL=?";
 
-    public CacheCommands(Connection newConnection, String tableName){
+    public CacheCommands(Connection newConnection, String tableName, boolean enableCache){
         conn = newConnection;
         this.tableName = tableName;
+        this.enableCache = enableCache;
     }
 
     public void writeCacheForUrl(String url, String etag, byte[] responseObject) {
@@ -110,6 +112,6 @@ public class CacheCommands implements CacheCommandsInterface{
     @Override
     public boolean cashIsEnabled() {
         // by default cash is enabled
-        return true;
+        return enableCache;
     }
 }

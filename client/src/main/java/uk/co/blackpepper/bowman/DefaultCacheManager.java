@@ -17,7 +17,7 @@ public enum DefaultCacheManager {
     private CacheCommands cacheCommands;
 
 
-     DefaultCacheManager() {
+    DefaultCacheManager() {
     }
 
     private Connection getDefaultConnection() {
@@ -44,21 +44,21 @@ public enum DefaultCacheManager {
         return conn;
     }
 
-    public CacheCommands setConnection(Connection newConn, String cacheTableName) {
-        if(this.cacheCommands == null) {
-            this.cacheCommands = new CacheCommands(newConn, cacheTableName);
+    public CacheCommands setConnection(Connection newConn, String cacheTableName, boolean enableCache) {
+        if (this.cacheCommands == null) {
+            this.cacheCommands = new CacheCommands(newConn, cacheTableName, enableCache);
         }
         return this.cacheCommands;
     }
 
-    public CacheCommands useDefaultConnection() {
-        if(this.cacheCommands == null) {
-            this.cacheCommands = new CacheCommands(getDefaultConnection(), defaultTableName);
+    public CacheCommands useDefaultConnection(boolean enableCache) {
+        if (this.cacheCommands == null) {
+            this.cacheCommands = new CacheCommands(getDefaultConnection(), defaultTableName, enableCache);
         }
         return this.cacheCommands;
     }
 
-    public CacheCommands getCacheCommands(){
+    public CacheCommands getCacheCommands() {
         return this.cacheCommands;
     }
 }
