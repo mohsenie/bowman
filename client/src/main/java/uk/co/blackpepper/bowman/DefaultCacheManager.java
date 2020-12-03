@@ -44,18 +44,18 @@ public enum DefaultCacheManager {
         return conn;
     }
 
-    public CacheCommands setConnection(Connection newConn, String cacheTableName) {
+    public DefaultCacheManager setConnection(Connection newConn, String cacheTableName) {
         if(this.cacheCommands == null) {
             this.cacheCommands = new CacheCommands(newConn, cacheTableName);
         }
-        return this.cacheCommands;
+        return this;
     }
 
-    public CacheCommands useDefaultConnection() {
+    public DefaultCacheManager useDefaultConnection() {
         if(this.cacheCommands == null) {
             this.cacheCommands = new CacheCommands(getDefaultConnection(), defaultTableName);
         }
-        return this.cacheCommands;
+        return this;
     }
 
     public CacheCommands getCacheCommands(){

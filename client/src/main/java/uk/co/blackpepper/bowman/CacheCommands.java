@@ -106,4 +106,10 @@ public class CacheCommands implements CacheCommandsInterface{
             logger.error("Error evicting cache for url " + url + " : " + ex.getMessage());
         }
     }
+
+    @Override
+    public boolean cashIsEnabled() {
+        // by default cash is enabled
+        return true;
+    }
 }

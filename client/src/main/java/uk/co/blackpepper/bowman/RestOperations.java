@@ -42,13 +42,11 @@ class RestOperations {
     private ClientFactoryCallBackInterface callbackInterface;
     private static final Logger logger = LoggerFactory.getLogger(RestOperations.class);
     private final CacheCommandsInterface cacheManagerInterface;
-    private final boolean disableCache;
 
-    RestOperations(RestTemplate restTemplate, ObjectMapper objectMapper, CacheCommandsInterface cacheManagerInterface, boolean disableCache) {
+    RestOperations(RestTemplate restTemplate, ObjectMapper objectMapper, CacheCommandsInterface cacheManagerInterface) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
         this.cacheManagerInterface = cacheManagerInterface;
-        this.disableCache = disableCache;
     }
 
     public void setCallbackInterface(ClientFactoryCallBackInterface callbackInterface) {
@@ -59,9 +57,9 @@ class RestOperations {
         ObjectNode node;
 
         try {
-            if(!disableCache) {
+            if (cacheManagerInterface.cashIsEnabled()) {
                 node = getCachedObject(uri);
-            }else {
+            } else {
                 node = restTemplate.getForObject(uri, ObjectNode.class);
             }
         } catch (HttpClientErrorException exception) {
@@ -81,10 +79,10 @@ class RestOperations {
         ObjectNode node;
 
         try {
-            if(!disableCache) {
+            if (cacheManagerInterface.cashIsEnabled()) {
                 logger.info("Cache is enabled");
                 node = getCachedObject(uri);
-            }else {
+            } else {
                 logger.info("Cache is is disabled");
                 node = restTemplate.getForObject(uri, ObjectNode.class);
             }
@@ -159,7 +157,7 @@ class RestOperations {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        if(etag != null) {
+        if (etag != null) {
             headers.add("If-None-Match", etag);
         }
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
@@ -167,7 +165,7 @@ class RestOperations {
 
         ResponseEntity<ObjectNode> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, ObjectNode.class);
 
-        if(result == null){
+        if (result == null) {
             logger.warn("cache is going to return null object because rest template has returned null object");
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Resource not found");
         }

@@ -6,4 +6,5 @@ public interface CacheCommandsInterface {
     String getEatgForUrl(String url);
     void evictCache();
     void evictCacheForUrl(String url);
+    boolean cashIsEnabled();
 }
